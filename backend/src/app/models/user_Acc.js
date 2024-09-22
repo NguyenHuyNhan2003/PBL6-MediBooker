@@ -25,15 +25,16 @@ const User = new Schema({
         default: 'user'
     },
     is_deleted: {
-        type: Boolean
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 
 // sign up
-User.statics.addUser = async function(email, password, username, phone, role, is_deleted) {
+User.statics.add_User = async function(email, password, username, phone) {
     //validation
     if(!email || !password){
-        throw Error('No empty field!')
+        throw Error('Email and password is required!')
     }
     
     if(!validator.isEmail(email)){
@@ -57,7 +58,7 @@ User.statics.addUser = async function(email, password, username, phone, role, is
     const salt = await bcrypt.genSalt(10)
     const hass = await bcrypt.hash(password, salt)
 
-    const user = await this.create({email, password: hass, username, phone, role, is_deleted})
+    const user = await this.create({email, password: hass, username, phone, role: 'user', is_deleted: false})
 
     return user
 }
