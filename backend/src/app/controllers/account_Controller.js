@@ -1,8 +1,8 @@
 const User = require('../models/user_Acc')
 const Doctor = require('../models/doc_Acc')
 
-const express = require('express')
 const multer = require('multer')
+const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
 
 require('dotenv').config()
@@ -20,9 +20,11 @@ const upload = multer({
   }
 }).single('proof')
 
+const uploadPromise = promisify(upload)
+
 class user_Controller{
     create_Token = (_id) => {
-        return jwt.sign({_id}, process.env.SECRET, {expiresIn: '1d'})
+        return jwt.sign({_id}, process.env.JWTSecret, {expiresIn: '1d'})
     }
 
     acc_Login = async(req, res) =>{
@@ -35,7 +37,7 @@ class user_Controller{
             const token = this.create_Token(acc._id)
             const role = acc.role
             
-            if(acc instanceof doc_Acc){
+            if(acc instanceof Doctor){
                 const verified = acc.verified
                 res.status(200).json({email, token, role, verified})
             }else{
@@ -48,19 +50,30 @@ class user_Controller{
     }
 
     acc_Signup = async(req, res) =>{
-        // get info from body
-        const { email, password, username, phone, is_doc} = req.body
-        const proof = req.file ? req.file.buffer : null
-        const role = 'user'
-        // add account
         try{
-            if(is_doc){ //if doctor account
-                const acc = Doctor.add_Doctor(email, password, username, phone, proof)
-                res.status(200).json({email, token, role})
+            // wait for file upload
+            await uploadPromise(req, res)
+            
+            // get info from body
+            const {email, password, username, phone, is_doc} = req.body
+            const proof = req.file ? req.file.buffer : null
+            const role = 'user'
+            let acc
+            
+            // add account
+            if(is_doc == '1'){ //if doctor account
+                // console.log('doc')
+                acc = await Doctor.add_Doctor(email, password, username, phone, proof)
             }else{
-                const acc = User.add_User(email, password, username, phone)
-                res.status(200).json({email, token, role})
+                // console.log('not doc')
+                acc = await User.add_User(email, password, username, phone)
             }
+            // console.log(acc)
+
+            // create token and respone
+            const token = this.create_Token(acc._id)
+            res.status(200).json({email, token, role})
+
         }catch(error){ //if user account
             console.log(error.message)
             res.status(400).json({error: error.message})

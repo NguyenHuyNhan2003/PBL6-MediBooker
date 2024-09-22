@@ -1,5 +1,7 @@
 const User = require('./user_Acc')
 
+const bcrypt = require('bcrypt')
+const validator = require('validator')
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
@@ -38,9 +40,10 @@ Doctor_Schema.statics.add_Doctor = async function(email, password, username, pho
     //     throw Error('Invalid phone number!')
     // }
 
-    const exists = await this.findOne({email})
+    const doc_exists = await this.findOne({email})
+    const user_exists = await User.findOne({email})
 
-    if(exists){
+    if(user_exists || doc_exists){
         throw Error('Email already in use!')
     }
     //hassing password
