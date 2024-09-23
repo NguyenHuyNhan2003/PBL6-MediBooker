@@ -24,6 +24,14 @@ const User = new Schema({
         required: true,
         default: 'user'
     },
+    profile_image: { 
+        type: Buffer,
+        default: null
+    },
+    underlying_condition: {
+        type: String,
+        default: 'none' 
+    },
     is_deleted: {
         type: Boolean,
         default: false
@@ -58,7 +66,7 @@ User.statics.add_User = async function(email, password, username, phone) {
     const salt = await bcrypt.genSalt(10)
     const hass = await bcrypt.hash(password, salt)
 
-    const user = await this.create({email, password: hass, username, phone, role: 'user', is_deleted: false})
+    const user = await this.create({email, password: hass, username, phone})
 
     return user
 }

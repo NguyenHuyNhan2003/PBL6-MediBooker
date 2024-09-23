@@ -1,4 +1,5 @@
-const User = require('./user_Acc')
+const User = require('./User')
+const Speciality = require('./Speciality')
 
 const bcrypt = require('bcrypt')
 const validator = require('validator')
@@ -6,15 +7,26 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const Doctor_Schema = new Schema({
+    specialty_id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Speciality', 
+        required: false 
+    },
     verified:{
         type: Boolean,
         default: false
     },
     working_hour: {
-        type: String
+        type: String,
+        default: 'undisclosed'
+    },
+    bio: {
+        type: String,
+        default: 'undisclosed'
     },
     region: {
-        type: String
+        type: String,
+        default: 'undisclosed'
     },
     proof: {
         type: Buffer,
@@ -50,8 +62,7 @@ Doctor_Schema.statics.add_Doctor = async function(email, password, username, pho
     const salt = await bcrypt.genSalt(10)
     const hass = await bcrypt.hash(password, salt)
 
-    const doctor = await this.create({email, password: hass, username, phone, role: 'user', is_deleted: false,
-                                     verified: false, working_hour: 'unknown', region: 'unknown', proof})
+    const doctor = await this.create({email, password: hass, username, phone, proof})
 
     return doctor
 }

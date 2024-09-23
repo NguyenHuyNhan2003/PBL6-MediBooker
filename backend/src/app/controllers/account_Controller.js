@@ -1,5 +1,5 @@
-const User = require('../models/user_Acc')
-const Doctor = require('../models/doc_Acc')
+const User = require('../models/User')
+const Doctor = require('../models/Doctor')
 
 const multer = require('multer')
 const { promisify } = require('util')
@@ -32,7 +32,8 @@ class user_Controller{
         const {email, password} = req.body
         // get account
         try{
-            const acc = User.login(email, password)
+            let acc
+            acc = await User.login(email, password)
 
             const token = this.create_Token(acc._id)
             const role = acc.role
