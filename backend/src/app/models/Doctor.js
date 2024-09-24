@@ -44,9 +44,9 @@ Doctor_Schema.statics.add_Doctor = async function(email, password, username, pho
         throw Error('Invalid email!')
     }
 
-    // if(!validator.isStrongPassword(password)){
-    //     throw Error('Password not strong enough!')
-    // }
+    if(!validator.isStrongPassword(password)){
+        throw Error('Password not strong enough!')
+    }
 
     // if(!validator.isMobilePhone(phone, 'vi-VN')){
     //     throw Error('Invalid phone number!')
